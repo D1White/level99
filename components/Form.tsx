@@ -1,5 +1,6 @@
 import { useState, FC } from 'react';
 import Router from 'next/router';
+import Link from 'next/link';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
 import axios from 'axios';
@@ -10,6 +11,7 @@ import LoadingButton from '@mui/lab/LoadingButton';
 import Typography from '@mui/material/Typography';
 
 import { LoginFormSchema, RegistrationFormSchema } from 'utils/schemas/authValidation';
+import serverDelay from 'utils/serverDelay';
 
 import { LoginForm, ILoginRes } from 'types/User';
 
@@ -33,10 +35,14 @@ const Form: FC<FormProps> = ({ type }) => {
     try {
       if (type === 'login') {
         const { data } = await axios.post<ILoginRes>('/api/user/auth', formData);
+        await serverDelay(data);
+
         localStorage.setItem('token', data.token);
         Router.push('/analytics');
       } else if (type === 'registration') {
         await axios.post<ILoginRes>('/api/user/registration', formData);
+        await serverDelay(formData);
+
         Router.push('/');
       } else {
         setLoading(false);
@@ -96,7 +102,13 @@ const Form: FC<FormProps> = ({ type }) => {
         name="password"
         defaultValue=""
         render={({ field }) => (
-          <TextField {...field} label="Password" variant="standard" error={!!errors.password} />
+          <TextField
+            {...field}
+            label="Password"
+            type="password"
+            variant="standard"
+            error={!!errors.password}
+          />
         )}
       />
 
@@ -114,6 +126,12 @@ const Form: FC<FormProps> = ({ type }) => {
       >
         {type === 'login' ? 'Sign in' : 'Sign up'}
       </LoadingButton>
+
+      <Link href={type === 'login' ? '/registration' : '/'} passHref>
+        <Typography variant="body1" component="a">
+          {type === 'login' ? 'Sign up' : 'Sign in'}
+        </Typography>
+      </Link>
     </Box>
   );
 };

@@ -12,7 +12,7 @@ const handler = async (req: NextApiRequest, res: NextApiResponse) => {
       .select('email, password, name, id')
       .match({ email: email, password: password });
 
-    if (!data || error) {
+    if (!data || !data[0] || error) {
       return res.status(401).end();
     }
 
