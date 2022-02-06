@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, FC } from 'react';
 import Router from 'next/router';
 import { useForm, Controller } from 'react-hook-form';
 import { yupResolver } from '@hookform/resolvers/yup';
@@ -9,17 +9,21 @@ import TextField from '@mui/material/TextField';
 import LoadingButton from '@mui/lab/LoadingButton';
 import Typography from '@mui/material/Typography';
 
-import { LoginFormSchema } from 'utils/schemas/authValidation';
+import { LoginFormSchema, RegistrationFormSchema } from 'utils/schemas/authValidation';
 
 import { LoginForm, ILoginRes } from 'types/User';
 
-const Form = () => {
+interface FormProps {
+  type: 'login' | 'registration';
+}
+
+const Form: FC<FormProps> = ({ type }) => {
   const {
     control,
     handleSubmit,
     formState: { errors },
   } = useForm<any>({
-    resolver: yupResolver(LoginFormSchema),
+    resolver: yupResolver(type === 'login' ? LoginFormSchema : RegistrationFormSchema),
   });
 
   const [loading, setLoading] = useState(false);
@@ -27,9 +31,16 @@ const Form = () => {
   const onSubmit = async (formData: LoginForm) => {
     setLoading(true);
     try {
-      const { data } = await axios.post<ILoginRes>('/api/user/auth', formData);
-      localStorage.setItem('token', data.token);
-      Router.push('/analytics');
+      if (type === 'login') {
+        const { data } = await axios.post<ILoginRes>('/api/user/auth', formData);
+        localStorage.setItem('token', data.token);
+        Router.push('/analytics');
+      } else if (type === 'registration') {
+        await axios.post<ILoginRes>('/api/user/registration', formData);
+        Router.push('/');
+      } else {
+        setLoading(false);
+      }
     } catch (err) {
       console.log(err);
       setLoading(false);
@@ -52,8 +63,20 @@ const Form = () => {
       onSubmit={handleSubmit(onSubmit)}
     >
       <Typography variant="h4" gutterBottom component="h1">
-        Login
+        {type === 'login' ? 'Login' : 'Registration'}
       </Typography>
+
+      {type === 'registration' && (
+        <Controller
+          control={control}
+          name="name"
+          defaultValue=""
+          render={({ field }) => (
+            <TextField {...field} label="Name" variant="standard" error={!!errors.name} />
+          )}
+        />
+      )}
+
       <Controller
         control={control}
         name="email"
@@ -89,7 +112,7 @@ const Form = () => {
           marginTop: '30px',
         }}
       >
-        Login
+        {type === 'login' ? 'Sign in' : 'Sign up'}
       </LoadingButton>
     </Box>
   );

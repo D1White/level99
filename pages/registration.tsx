@@ -6,7 +6,7 @@ import Container from '@mui/material/Container';
 import Header from 'components/Header';
 import Form from 'components/Form';
 
-const Home: NextPage = () => {
+const Registration: NextPage = () => {
   const matches = useMediaQuery((theme: Theme) => theme.breakpoints.up('sm'));
 
   return (
@@ -23,10 +23,10 @@ const Home: NextPage = () => {
           height: '100vh',
         }}
       >
-        <Form type="login" />
+        <Form type="registration" />
       </Container>
     </>
   );
 };
 
-export default Home;
+export default Registration;

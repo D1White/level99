@@ -1,9 +1,8 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
-import fs from 'fs';
 
-import users from 'data/users.json';
+import supabase from 'utils/supabase';
 
-function handler(req: NextApiRequest, res: NextApiResponse) {
+async function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'POST') {
     const { name, email, password } = req.body;
 
@@ -12,17 +11,18 @@ function handler(req: NextApiRequest, res: NextApiResponse) {
     }
 
     const newUser = {
-      id: users.length ? Math.max(...users.map((x) => x.id)) + 1 : 1,
       email,
       password,
       name,
     };
 
-    const allUsers = [...users, newUser];
+    const { data, error } = await supabase.from('user').insert(newUser);
 
-    fs.writeFileSync('data/users.json', JSON.stringify(allUsers, null, 4));
+    if (error) {
+      res.status(405).json(JSON.stringify(error));
+    }
 
-    res.status(201).json({});
+    res.status(201).json(data);
   } else {
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }

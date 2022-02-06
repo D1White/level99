@@ -1,27 +1,24 @@
 import type { NextApiRequest, NextApiResponse } from 'next';
 import jwt from 'jsonwebtoken';
 
-import apiHandler from 'utils/api/api-handler';
+import supabase from 'utils/supabase';
 
-import users from 'data/users.json';
-
-const handler = (req: NextApiRequest, res: NextApiResponse) => {
+const handler = async (req: NextApiRequest, res: NextApiResponse) => {
   if (req.method === 'POST') {
     const { email, password } = req.body;
-    const user = users.find((user) => user.email === email && user.password === password);
 
-    if (!user) {
+    const { data, error } = await supabase
+      .from('user')
+      .select('email, password, name, id')
+      .match({ email: email, password: password });
+
+    if (!data || error) {
       return res.status(401).end();
     }
 
-    const token = jwt.sign({ data: user }, process.env.JWT_SECRET, { expiresIn: '1d' });
+    const token = jwt.sign({ data: data[0] }, process.env.JWT_SECRET, { expiresIn: '1d' });
 
-    return res.status(200).json({
-      id: user.id,
-      email,
-      name: user.name,
-      token,
-    });
+    return res.status(200).json({ ...data[0], token });
   } else {
     return res.status(405).end(`Method ${req.method} not allowed`);
   }

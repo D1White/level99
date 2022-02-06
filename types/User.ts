@@ -10,6 +10,8 @@ export interface IUserFull extends IUser {
   password: string;
 }
 
+export type CreateUser = Pick<IUserFull, 'email' | 'password' | 'name'>;
+
 export type LoginForm = Pick<IUserFull, 'email' | 'password'>;
 
 export interface ILoginRes extends IUser {
