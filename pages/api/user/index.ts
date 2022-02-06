@@ -3,9 +3,9 @@ import jwt from 'jsonwebtoken';
 
 import apiHandler from 'utils/api/api-handler';
 
-import { IUser, JWTUser } from 'types/User';
+import { JWTUser } from 'types/User';
 
-function handler(req: NextApiRequest, res: NextApiResponse<IUser>) {
+function handler(req: NextApiRequest, res: NextApiResponse) {
   if (req.method === 'GET') {
     const authHeader = req.headers.authorization;
     if (!authHeader) {
@@ -16,7 +16,11 @@ function handler(req: NextApiRequest, res: NextApiResponse<IUser>) {
 
     const decoded = jwt.verify(token, process.env.JWT_SECRET) as JWTUser;
 
-    res.status(200).json(decoded.data);
+    res.status(200).json({
+      id: decoded.data.id,
+      email: decoded.data.email,
+      name: decoded.data.name,
+    });
   } else {
     return res.status(405).end(`Method ${req.method} Not Allowed`);
   }

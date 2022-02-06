@@ -10,13 +10,20 @@ import Box from '@mui/material/Box';
 import Header from 'components/Header';
 import Table from 'components/Table';
 import LineChart from 'components/LineChart';
+import withAuth from 'components/HOC/withAuth';
 
-const Analitics: NextPage = () => {
+import { IUser } from 'types/User';
+
+interface AnaliticsProps {
+  user: IUser;
+}
+
+const Analitics: NextPage<AnaliticsProps> = ({ user }) => {
   const matches = useMediaQuery((theme: Theme) => theme.breakpoints.up('sm'));
 
   return (
     <Box sx={{ maxHeight: '100vh' }}>
-      <Header />
+      <Header user={user} />
       <Container
         maxWidth="xl"
         sx={{
@@ -35,4 +42,4 @@ const Analitics: NextPage = () => {
   );
 };
 
-export default Analitics;
+export default withAuth(Analitics);

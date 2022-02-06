@@ -3,9 +3,17 @@ import { JwtPayload } from 'jsonwebtoken';
 export interface IUser {
   id: number;
   email: string;
+  name: string;
+}
+
+export interface IUserFull extends IUser {
   password: string;
-  firstName: string;
-  lastName: string;
+}
+
+export type LoginForm = Pick<IUserFull, 'email' | 'password'>;
+
+export interface ILoginRes extends IUser {
+  token: string;
 }
 
 export interface JWTUser extends JwtPayload {
